@@ -1,4 +1,4 @@
-package com.dorjear.example.fundamental.inheritance;
+package com.dorjear.training.fundamental.inheritance;
 
 import java.lang.reflect.Field;
 

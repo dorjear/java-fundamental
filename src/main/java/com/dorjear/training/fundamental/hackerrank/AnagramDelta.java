@@ -1,32 +1,33 @@
-package com.dorjear.example.fundamental.hackerrank;
+package com.dorjear.training.fundamental.hackerrank;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
-public class MinDiff {
+public class AnagramDelta {
 
     // Counts the no of manipulations required
-    public static int minDiff(List<Integer> arr) {
-        int result = 0;
-        arr.sort(Comparator.comparingInt(a -> a));
-        Iterator<Integer> i = arr.iterator();
-        if(!i.hasNext()) return result;
-        int base = i.next();
-        while(i.hasNext()){
-            int next = i.next();
-            result += Math.abs(next-base);
-            base = next;
-        }
-        return result;
+    public static int numberNeeded(String first, String second) {
+        if(first.length()!=second.length()) return -1;
+        AtomicInteger count = new AtomicInteger();
+        List<Character> a = first.chars().mapToObj(c -> (char) c).collect(Collectors.toList());;
+        List<Character> b = second.chars().mapToObj(c -> (char) c).collect(Collectors.toList());;
+        b.forEach(each -> {
+            if(a.contains(each)){
+                a.remove(each);
+            }else{
+                count.getAndIncrement();
+            }
+
+        });
+        return count.intValue();
     }
 
     public static void main(String[] args) {
 //        Scanner in = new Scanner(System.in);
-        List<Integer> input = Arrays.asList(1,3,3,2,4);
-//        minDiff(input);
-        System.out.println(minDiff(input));
+        String a = "aabcgt";
+        String b = "abjjgh";
+        System.out.println(numberNeeded(a, b));
     }
 
 //    public static boolean isBalanced(String s) {

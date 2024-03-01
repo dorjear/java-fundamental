@@ -1,4 +1,4 @@
-package com.dorjear.example.fundamental.inheritance;
+package com.dorjear.training.fundamental.inheritance;
 
 public class Fruit {
     private String name = null;
