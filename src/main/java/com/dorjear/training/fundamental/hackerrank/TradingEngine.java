@@ -10,17 +10,13 @@ public class TradingEngine {
         int totalShort = 0;
         int boxedQuantity = 0;
 
-        void updateNetPosition(int quantity) {
+        void updatePosition(int quantity) {
             netQuantity += quantity;
             if (quantity > 0) {
                 totalLong += quantity;
             } else {
                 totalShort += Math.abs(quantity);
             }
-        }
-
-        void updatePosition(int quantity) {
-            updateNetPosition(quantity);
             updateBoxedQuantity();
         }
 
@@ -59,9 +55,8 @@ public class TradingEngine {
                 if (position.boxedQuantity > 0) {
                     result.add(String.format("Boxed,%s,%s,%d", trader, symbol, position.boxedQuantity));
                 }
-                if (position.netQuantity != 0) {
-                    result.add(String.format("Netted,%s,%s,%d", trader, symbol, position.netQuantity));
-                }
+                // Always add a Netted entry, even if netQuantity is zero
+                result.add(String.format("Netted,%s,%s,%d", trader, symbol, position.netQuantity));
             }
         }
 
