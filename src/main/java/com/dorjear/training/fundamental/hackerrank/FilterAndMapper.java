@@ -7,7 +7,6 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 
 /*
@@ -15,28 +14,23 @@ import java.util.stream.Collectors;
  */
 
 class Filter {
-    // Method that returns a Predicate to check if the name starts with the given prefix
+
     public static Predicate<String> nameStartingWithPrefix(String prefix) {
         return name -> name.startsWith(prefix);
     }
 }
-
 class Mapper {
-    // Method that returns a Function to map a name to its CharactersCount (counting distinct characters)
+
     public static Function<String, CharactersCount> getDistinctCharactersCount() {
         return name -> {
-            // Count distinct characters in the name using a set
-            long distinctCharCount = name.chars()
-                    .mapToObj(c -> (char) c)
-                    .collect(Collectors.toSet())
-                    .size();
-            // Create and return a new CharactersCount object
-            return new CharactersCount(name, (int) distinctCharCount);
+            Set<Character> distinctChars = new HashSet<>();
+            for (char c : name.toCharArray()) {
+                distinctChars.add(c);
+            }
+            return new CharactersCount(name, distinctChars.size());
         };
     }
 }
-
-
 class CharactersCount {
     private final String name;
     private final Integer distinctCharacterCount;
