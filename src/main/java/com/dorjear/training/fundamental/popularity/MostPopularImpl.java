@@ -9,17 +9,32 @@ public class MostPopularImpl implements MostPopular {
     private Integer max = -1;
     private Integer maxId = -1;
 
+    private final Object lock = new Object(); // For synchronizing max tracking
+
     @Override
     public void increasePopularity(Integer contentId) {
-        ContentPopularity theOne = popularityMap.get(contentId);
-        if (theOne == null) {
-            popularityMap.put(contentId, new ContentPopularity(contentId, 0));
-            return;
+        popularityMap.compute(contentId, (id, existing) -> {
+            if (existing == null) {
+                existing = new ContentPopularity(id, 0);
+            }
+            existing.setPopularity(existing.getPopularity() + 1);
+            return existing;
+        });
+
+        ContentPopularity updated = popularityMap.get(contentId);
+
+        synchronized (lock) {
+            if (updated.getPopularity() > max ||
+                    (updated.getPopularity() == max && contentId < maxId)) {
+                max = updated.getPopularity();
+                maxId = contentId;
+            }
         }
-        theOne.setPopularity(theOne.getPopularity() + 1);
-        if (theOne.getPopularity() >= max) {
-            max = theOne.getPopularity();
-            maxId = theOne.getContentId();
+    }
+
+    public int getMostPopularContentId() {
+        synchronized (lock) {
+            return maxId;
         }
     }
 
@@ -43,21 +58,31 @@ public class MostPopularImpl implements MostPopular {
 
     @Override
     public void decreasePopularity(Integer contentId) {
-        ContentPopularity theOne = popularityMap.get(contentId);
-        if (theOne == null) {
-            popularityMap.put(contentId, new ContentPopularity(contentId, 0));
-            return;
-        }
-        if (theOne.getPopularity() > 0) theOne.setPopularity(theOne.getPopularity() - 1);
+        ContentPopularity updated = popularityMap.compute(contentId, (id, existing) -> {
+            if (existing == null) {
+                return new ContentPopularity(id, 0);
+            }
+            int current = existing.getPopularity();
+            if (current > 0) {
+                existing.setPopularity(current - 1);
+            }
+            return existing;
+        });
 
-        if (theOne.getContentId() == maxId) {
-            ContentPopularity mostPopular = popularityMap.values().stream().max(Comparator.comparingInt(ContentPopularity::getPopularity)).get();
-            if (mostPopular.getPopularity() <= 0) {
-                max = -1;
-                maxId = -1;
-            } else {
-                max = mostPopular.getPopularity();
-                maxId = mostPopular.getContentId();
+        synchronized (lock) {
+            if (contentId.equals(maxId)) {
+                // Recalculate max only if current max may have changed
+                ContentPopularity newMax = popularityMap.values().stream()
+                        .max(Comparator.comparingInt(ContentPopularity::getPopularity))
+                        .orElse(null);
+
+                if (newMax == null || newMax.getPopularity() <= 0) {
+                    max = -1;
+                    maxId = -1;
+                } else {
+                    max = newMax.getPopularity();
+                    maxId = newMax.getContentId();
+                }
             }
         }
     }
